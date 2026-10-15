@@ -1,0 +1,201 @@
+"""
+KOLONI - No PC Flutter Simulator for Tecno Pop 8 Go
+Author: BOBOYE OLUSOLA OLUWAFEMI
+Runs your Flutter main.dart logic in Pydroid 3 - No PC needed!
+Shout OLE / THIEF / YELLOW CASSAVA and it will respond!
+"""
+
+print("KOLONI Voice Hub - No PC Version")
+print("Author: BOBOYE OLUSOLA OLUWAFEMI")
+print("pubspec.yaml v1.1.0+2")
+print("="*50)
+
+# Same Knowledge Base from your Flutter lib/main.dart
+sectorKB = {
+    "Agriculture": {
+        "yellow cassava": "Oga, your cassava get mosaic disease. Comot all yellow leaves now and burn them. Plant TME 419 next time.",
+        "maize worm": "Na army worm dey worry your maize. Mix neem oil 2 spoons for 1 litre water and spray.",
+        "rice water": "Rice need water 3 inch high for farm till harvest near.",
+        "tomato rot": "Tomato rot na fungus. No water leaf too much. Remove bad tomato comot.",
+    },
+    "Health": {
+        "fever hot": "Give paracetamol, plenty water. If fever no go after 2 days, go clinic quick.",
+        "stomach pain": "No eat dirty food. Drink clean water. If pain too much, see doctor.",
+    },
+    "Market": {
+        "sell rice": "We don record your sale. Tonight we go calculate your profit for you.",
+        "sell bag": "Sale saved. NExtop go track your market profit.",
+    },
+    "Education": {
+        "photosynthesis": "Photosynthesis na how plant dey cook food with sun and water for leaf.",
+        "mathematics": "Mathematics na to count and calculate things well well.",
+    },
+    "Emergency": {
+        "help ole": "HELP COMING! We don call Police 199. Share location now. KOLONI Emergency SOS activated!",
+        "ole": "HELP COMING! Ole! Ole! We don call Police 199! Stay safe! KOLONI don alert neighbors!",
+        "thief": "THIEF ALERT! HELP COMING Police 199! KOLONI Emergency!",
+        "robber": "ROBBER ALERT! Police 199 notified! HELP COMING!",
+        "emergency": "Emergency SOS activated! Police 199 notified! HELP COMING!",
+    },
+}
+
+def getAnswer(question, sector="Agriculture"):
+    q = question.lower().strip()
+    
+    # EMERGENCY FIRST - Most important for Pop 8 Go
+    if any(word in q for word in ["ole", "thief", "robber", "help", "emergency", "sos", "arm robber"]):
+        print("\n🚨 EMERGENCY DETECTED! 🚨")
+        for key in sectorKB["Emergency"]:
+            if key in q or any(w in q for w in key.split()):
+                return sectorKB["Emergency"][key]
+        return sectorKB["Emergency"]["help ole"]
+    
+    # Check requested sector first
+    kb = sectorKB.get(sector, sectorKB["Agriculture"])
+    
+    # Exact multi-word match
+    for key in kb.keys():
+        parts = key.split(' ')
+        if all(p in q for p in parts):
+            return kb[key]
+    
+    # Partial match - first word
+    for key in kb.keys():
+        if key.split(' ')[0] in q:
+            return kb[key]
+    
+    # Search ALL sectors if not found in current sector
+    for sec_name, sec_kb in sectorKB.items():
+        if sec_name == "Emergency":
+            continue
+        for key in sec_kb.keys():
+            parts = key.split(' ')
+            if all(p in q for p in parts):
+                return f"[{sec_name}] {sec_kb[key]}"
+    
+    return f"We don save your question for {sector}. When you get network, NExtop expert go answer you. Your question: {question}"
+
+# Try to use speech recognition if available
+try:
+    import speech_recognition as sr
+    HAS_VOICE = True
+    print("Voice module found - You can SHOUT!")
+except:
+    HAS_VOICE = False
+    print("Voice module not found - Typing mode")
+    print("To enable voice: In Pydroid, pip install SpeechRecognition")
+
+try:
+    import pyttsx3
+    engine = pyttsx3.init()
+    engine.setProperty('rate', 150)
+    HAS_TTS = True
+    print("TTS found - KOLONI go talk!")
+except:
+    HAS_TTS = False
+    print("TTS not found - Text only")
+    print("To enable talk: pip install pyttsx3")
+
+def speak(text):
+    print(f"\n🔊 KOLONI ANSWER: {text}\n")
+    if HAS_TTS:
+        try:
+            engine.say(text)
+            engine.runAndWait()
+        except Exception as e:
+            print(f"TTS error: {e}")
+    else:
+        print("(Install pyttsx3 to hear voice)")
+
+print("\n" + "="*50)
+print("HOW TO USE ON POP 8 GO WITHOUT PC:")
+print("="*50)
+print("1. TYPING MODE (Works now):")
+print("   Type your question and press Enter")
+print("   Try: yellow cassava, help ole, thief, fever hot")
+print("")
+print("2. VOICE MODE (Shout OLE!):")
+print("   If you installed SpeechRecognition:")
+print("   Type 'voice' and press Enter, then SHOUT!")
+print("")
+print("Type 'sector Agriculture' or 'sector Emergency' to change sector")
+print("Type 'quit' to exit")
+print("="*50 + "\n")
+
+current_sector = "Agriculture"
+
+while True:
+    try:
+        if HAS_VOICE:
+            user_input = input(f"[{current_sector}] You (type, or 'voice' to shout, or 'quit'): ").strip()
+        else:
+            user_input = input(f"[{current_sector}] You (type question): ").strip()
+        
+        if not user_input:
+            continue
+        
+        if user_input.lower() == 'quit' or user_input.lower() == 'exit':
+            print("KOLONI closing. Author: BOBOYE OLUSOLA OLUWAFEMI")
+            break
+        
+        # Change sector
+        if user_input.lower().startswith('sector'):
+            parts = user_input.split()
+            if len(parts) > 1:
+                new_sector = parts[1].capitalize()
+                if new_sector in sectorKB:
+                    current_sector = new_sector
+                    print(f"Sector changed to {current_sector}")
+                else:
+                    print(f"Sectors: {list(sectorKB.keys())}")
+            else:
+                print(f"Current sector: {current_sector}, Available: {list(sectorKB.keys())}")
+            continue
+        
+        # Voice mode
+        if user_input.lower() == 'voice' and HAS_VOICE:
+            print("\n🎤 LISTENING... SHOUT NOW! (Say OLE, THIEF, YELLOW CASSAVA)")
+            print("Speak within 5 seconds...")
+            try:
+                r = sr.Recognizer()
+                with sr.Microphone() as source:
+                    r.adjust_for_ambient_noise(source, duration=0.5)
+                    audio = r.listen(source, timeout=5, phrase_time_limit=5)
+                    print("Processing your voice...")
+                    # Try offline first, then online
+                    try:
+                        text = r.recognize_sphinx(audio)
+                        print(f"You shouted: {text}")
+                        user_input = text
+                    except:
+                        try:
+                            text = r.recognize_google(audio)
+                            print(f"You shouted: {text}")
+                            user_input = text
+                        except Exception as e:
+                            print(f"Could not understand: {e}")
+                            print("Try typing instead")
+                            continue
+            except Exception as e:
+                print(f"Mic error: {e}")
+                print("Try typing: help ole")
+                continue
+        
+        # Get answer using same logic as Flutter
+        answer = getAnswer(user_input, current_sector)
+        print(f"\nYOU SAID: {user_input}")
+        speak(answer)
+        
+        # Emergency extra action
+        if "HELP COMING" in answer or "EMERGENCY" in answer or "ALERT" in answer:
+            print("🚨🚨🚨 EMERGENCY PROTOCOL 🚨🚨🚨")
+            print("1. Calling Police 199 (simulated)")
+            print("2. Sharing location (would use geolocator in Flutter)")
+            print("3. Alerting neighbors")
+            print("🚨🚨🚨 STAY SAFE! 🚨🚨🚨")
+        
+    except KeyboardInterrupt:
+        print("\nKOLONI stopped by user")
+        break
+    except Exception as e:
+        print(f"Error: {e}")
