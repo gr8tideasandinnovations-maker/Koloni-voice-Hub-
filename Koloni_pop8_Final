@@ -1,0 +1,51 @@
+from flask import Flask, request, jsonify
+import threading
+import time
+import urllib.request
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return jsonify(app="KOLONI Voice Hub - NExtop Tech", author="BOBOYE OLUSOLA OLUWAFEMI", status="Online", phone="Tecno Pop 8 Go", result="SUCCESS")
+
+@app.route('/emergency')
+def emergency():
+    q = request.args.get('question','')
+    return jsonify(emergency=True, message="HELP COMING Police 199", question=q)
+
+def run_server():
+    app.run(host="127.0.0.1", port=8080, debug=False, use_reloader=False)
+
+# Start server in background
+thread = threading.Thread(target=run_server, daemon=True)
+thread.start()
+
+print("Starting server...")
+time.sleep(3)
+
+# Test inside Pydroid - no browser needed
+try:
+    print("Testing http://127.0.0.1:8080/")
+    with urllib.request.urlopen("http://127.0.0.1:8080/") as r:
+        data = r.read().decode()
+        print("RESULT FROM SERVER:")
+        print(data)
+        print("")
+        print("KOLONI IS WORKING ON YOUR POP 8!")
+        print("Author: BOBOYE OLUSOLA OLUWAFEMI")
+    
+    print("")
+    print("Testing emergency...")
+    with urllib.request.urlopen("http://127.0.0.1:8080/emergency?question=help%20ole") as r:
+        data2 = r.read().decode()
+        print(data2)
+        
+except Exception as e:
+    print("Error:", e)
+
+print("")
+print("Server still running. Keep this tab open.")
+# Keep alive
+while True:
+    time.sleep(1)
